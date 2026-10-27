@@ -30,10 +30,15 @@ class ClaudeTextResult:
     input_tokens: int   # Tokens in the prompt (useful for cost tracking)
     output_tokens: int  # Tokens in the response (useful for cost tracking)
 
+# Placeholder for "any Pydantic model class". It lets ClaudeStructuredResult
+# and generate_structured keep the exact type: pass TicketAnalysis in and
+# get a TicketAnalysis back (not a generic BaseModel).
 StructuredModel = TypeVar("StructuredModel", bound=BaseModel)
 
 @dataclass(frozen=True)
 class ClaudeStructuredResult(Generic[StructuredModel]):
+    # Same idea as ClaudeTextResult, but data is an already-validated
+    # Pydantic object instead of a plain string.
     # Immutable (frozen) result object: callers get only the data they need,
     # not the raw SDK response object.
     data: StructuredModel   # The parsed structured data
@@ -143,9 +148,12 @@ class ClaudeService:
         max_tokens: int = 500,
         system: str | None = None,
     ) -> ClaudeStructuredResult[StructuredModel]:
-        # Generate text from Claude, then parse it into a Pydantic model.
-        # structured_model is the Pydantic model class to parse into.
+        # Ask Claude for a reply and parse it into a Pydantic model.
+        # output_model is the Pydantic model class the reply must match.
+        # user_message / system / max_tokens work as in generate_text.
 
+        # Same request shape as generate_text, plus output_format, which
+        # tells the SDK which schema to request and parse the reply into.
         request = {
             "model": self.model,
             "max_tokens": max_tokens,
@@ -162,19 +170,26 @@ class ClaudeService:
             request["system"] = system
 
         try:
+            # messages.parse sends the request and validates the reply
+            # against output_model in one step.
             message = await self.client.messages.parse(
                 **request
             )
         except ValidationError as exc:
+            # The reply did not match the schema: never treat it as valid
+            # application data. Re-raise as our own error type.
             raise ClaudeErrorResponse(
-                "Claude structured output failed application validatioon"
+                "Claude structured output failed application validation"
             ) from exc
 
+        # parsed_output is None when nothing could be parsed (for example,
+        # the response was cut off or refused), so check before using it.
         if message.parsed_output is None:
             raise ClaudeErrorResponse(
                 "Claude returned no structured output"
             )
 
+        # Return only the validated data plus the usage numbers.
         return ClaudeStructuredResult[StructuredModel](
             data=message.parsed_output,
             model=message.model,
