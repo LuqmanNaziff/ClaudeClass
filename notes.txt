@@ -1,0 +1,18 @@
+Day 1: API -> Prompt -> Structured Output -> Backend
+Day 2: Database -> Workflow -> Tools
+Day 3: Security -> Monitoring/Observability -> Performace -> Final Project
+
+======================================== CLAUDE API OVERVIEW ==================================================
+Help the application process results and monitor API usage:
+model: Claude AI model (claude-sonnet-4-6, claude-haikyu-4-6)
+system/application instructions: AI's role, rules, behaviours, app-level instructions
+    "You are a python tutor"
+messages: conversation messages, e.g. user input and prior turns
+max_tokens: set the maximum number of tokens claude may use to generate a response
+    input tokens: content sent to the model
+    output token: content returned by the model
+    E.G. 1024 tokens
+    1 token = roughly 4 characters in Englsh language
+    Helps with API costs, context window: limit to how many tokens a model can handle
+response content: What work did they deliver
+usage: how many tokens were used performing a task?
