@@ -16,3 +16,25 @@ max_tokens: set the maximum number of tokens claude may use to generate a respon
     Helps with API costs, context window: limit to how many tokens a model can handle
 response content: What work did they deliver
 usage: how many tokens were used performing a task?
+
+======================================== WHY STRUCTURED OUTPUT MATTERS ==================================================
+Prose:
+This looks like a fairly serious shipping problem. The customer sounds frustrated and probably needs someone to check the order.
+
+Structured:
+{
+  "summary": "Customer reports a repeated late-delivery issue.",
+  "category": "delivery",
+  "sentiment": "negative",
+  "priority": "high",
+  "needs_order_lookup": true,
+  "needs_faq_lookup": false,
+  "needs_human_review": false,
+  "faq_query": null,
+  "human_review_reason": null
+}
+
+
+route = HTTP concerns
+AnalysisService = application use case
+ClaudeService = Anthropic SDK concern
