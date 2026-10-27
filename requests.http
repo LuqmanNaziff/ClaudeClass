@@ -1,0 +1,7 @@
+### First Claude-powered API request to test the summarisation endpoint
+POST http://127.0.0.1:8000/summarise
+Content-Type: application/json
+
+{
+    "text": "My package was supposed to arrive yesterday. This is the third delivery problem I have had and I am frustrated. Can someone tell me where my order is?"
+}
