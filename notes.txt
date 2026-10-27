@@ -48,3 +48,6 @@ Structured:
 }
 Valid JSON? Yes
 Valid TicketAnalysis output? No
+
+Currently, the /analysis endpoints works as so:
+HTTP -> route -> AnalysisService -> ClaudeService -> Anthropic 
