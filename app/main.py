@@ -1,8 +1,11 @@
 from fastapi import FastAPI
 from app.api.router import api_router
+from app.config import get_settings
+
+settings = get_settings()
 
 app = FastAPI(
-    title="Claude AI for Programmers and Automation C2 2026",
+    title=settings.app_name,
     version="0.1.0",
 )
 
