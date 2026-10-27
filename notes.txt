@@ -35,6 +35,16 @@ Structured:
 }
 
 
-route = HTTP concerns
-AnalysisService = application use case
-ClaudeService = Anthropic SDK concern
+========================================  Valid JSON vs valid application data ==================================================
+
+{
+  "summary": "Customer is angry.",
+  "category": "shipping_problem",
+  "sentiment": "super_angry",
+  "priority": "ASAP",
+  "needs_order_lookup": true,
+  "needs_faq_lookup": false,
+  "needs_human_review": false
+}
+Valid JSON? Yes
+Valid TicketAnalysis output? No

@@ -1,8 +1,16 @@
 from fastapi import APIRouter
 from app.prompts.summarise import (SUMMARISE_SYSTEM_PROMPT,)
 
-from app.schemas.ai import SummariseRequest, SummariseResponse
 from app.services.claude_service import ClaudeService
+from app.schemas.ai import (
+    AnalyseRequest,
+    AnalyseResponse,
+    SummariseRequest,
+    SummariseResponse,
+)
+from app.schemas.usage import AIUsage
+from app.services.analysis_service import AnalysisService
+
 
 router = APIRouter(tags=["ai"])
 
@@ -29,4 +37,32 @@ async def summarise_text(
         model=result.model,
         input_tokens=result.input_tokens,
         output_tokens=result.output_tokens,
+    )
+
+@router.post(
+    "/analyse",
+    response_model=AnalyseResponse,
+)
+async def analyse_ticket(
+    request: AnalyseRequest,
+) -> AnalyseResponse:
+    claude_service = ClaudeService()
+    analysis_service = AnalysisService(
+        claude_service
+    )
+
+    try:
+        result = await analysis_service.analyse(
+            request.message
+        )
+    finally:
+        await claude_service.close()
+
+    return AnalyseResponse(
+        analysis=result.data,
+        usage=AIUsage(
+            model=result.model,
+            input_tokens=result.input_tokens,
+            output_tokens=result.output_tokens,
+        ),
     )
