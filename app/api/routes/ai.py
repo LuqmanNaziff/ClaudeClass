@@ -5,9 +5,12 @@ from app.services.claude_service import ClaudeService
 from app.schemas.ai import (
     AnalyseRequest,
     AnalyseResponse,
+    GenerateResponseRequest,
+    GenerateResponseResponse,
     SummariseRequest,
     SummariseResponse,
 )
+from app.services.response_service import ResponseService
 from app.schemas.usage import AIUsage
 from app.services.analysis_service import AnalysisService
 
@@ -76,6 +79,42 @@ async def analyse_ticket(
     # its own AIUsage object so token counts stay separate from the answer.
     return AnalyseResponse(
         analysis=result.data,
+        usage=AIUsage(
+            model=result.model,
+            input_tokens=result.input_tokens,
+            output_tokens=result.output_tokens,
+        ),
+    )
+
+
+# POST /generate-response: send a customer message, get a draft reply back.
+# The draft is plain text for a human to review, not a final answer.
+@router.post(
+    "/generate-response",
+    response_model=GenerateResponseResponse,
+)
+async def generate_response(
+    request: GenerateResponseRequest,
+) -> GenerateResponseResponse:
+    # Same pattern as /analyse: the route builds the services and
+    # ResponseService holds the use-case logic.
+    claude_service = ClaudeService()
+    response_service = ResponseService(
+        claude_service
+    )
+
+    try:
+        result = await response_service.generate(
+            request.customer_message
+        )
+    finally:
+        # Always release the HTTP connections, even if the call failed.
+        await claude_service.close()
+
+    # The draft is plain text (result.text), so there is no schema to
+    # unpack here; usage is grouped in AIUsage as in /analyse.
+    return GenerateResponseResponse(
+        draft_response=result.text,
         usage=AIUsage(
             model=result.model,
             input_tokens=result.input_tokens,

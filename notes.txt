@@ -51,3 +51,7 @@ Valid TicketAnalysis output? No
 
 Currently, the /analysis endpoints works as so:
 HTTP -> route -> AnalysisService -> ClaudeService -> Anthropic 
+
+
+Exercise 6
+customer message -> FastAPI -> ResponseService -> ClaudeService -> draft support message
