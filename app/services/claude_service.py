@@ -54,7 +54,7 @@ class ClaudeService:
             "max_tokens": max_tokens,
             "messages": [
                 {
-                    "role": "user", 
+                    "role": "user",
                     "content": user_message,
                 },
             ],
@@ -63,12 +63,12 @@ class ClaudeService:
         if system:
             request["system"] = system
 
-        message = await self.client.chat.create(**request)
+        message = await self.client.messages.create(**request)
 
         text_parts = [
             block.text
             for block in message.content
-            if block.type == "text"
+            if getattr(block, "type", None) == "text"
         ]
         text = "\n".join(text_parts).strip()
 
