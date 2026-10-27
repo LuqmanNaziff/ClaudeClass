@@ -52,7 +52,7 @@ class TicketAnalysis(StrictModel):
     # developer's code, not Claude, decides what to do with them.
     needs_faq_lookup: bool
     needs_order_lookup: bool
-    need_human_review: bool
+    needs_human_review: bool
 
     # Optional details; only required when the matching flag is True
     # (enforced by validate_dependencies below).
@@ -76,8 +76,8 @@ class TicketAnalysis(StrictModel):
         if self.needs_faq_lookup and not self.faq_query:
             raise ValueError("faq_query is required when needs_faq_lookup is True")
         # A human reviewer needs to know why the ticket was escalated.
-        if self.need_human_review and not self.human_review_reason:
-            raise ValueError("human_review_reason is required when need_human_review is True")
+        if self.needs_human_review and not self.human_review_reason:
+            raise ValueError("human_review_reason is required when needs_human_review is True")
         return self
 
 # Reply of POST /analyse: the validated analysis plus token usage.
