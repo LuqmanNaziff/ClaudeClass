@@ -5,7 +5,7 @@ from pydantic import Field
 from app.schemas.ai import TicketAnalysis
 from app.schemas.common import StrictModel, TicketStatus
 from app.schemas.order import OrderContext
-
+from app.schemas.faq import FAQSource
 
 class TicketCreateRequest(StrictModel):
     # User/application inentifiers arrive with the support request
@@ -34,8 +34,7 @@ class TicketResponse(StrictModel):
     analysis : TicketAnalysis
 
     order_context: OrderContext | None = None
-    faq_context: list[dict] = Field(default_factory=list)
-    # faq_context[FAQSource]
+    faq_context: list[FAQSource] = Field(default_factory=list)
     draft_response: str | None = None
 
     # Application-owned workflow state, not set by Claude
