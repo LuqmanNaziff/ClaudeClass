@@ -151,3 +151,14 @@ Content-Type: application/json
   "customer_message": "What is the approved return period?",
   "faq_ids": ["FAQ-001"]
 }
+
+
+### Test /workflows/process-ticket endpoint
+POST http://127.0.0.1:8000/workflows/process-ticket
+Content-Type: application/json
+
+{
+  "customer_id": "CUST-104",
+  "order_id": "ORD-1005",
+  "message": "My package was supposed to arrive yesterday. This is the third time I have had a delivery problem and I am really frustrated. Where is my order?"
+}
