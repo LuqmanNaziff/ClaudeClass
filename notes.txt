@@ -55,3 +55,43 @@ HTTP -> route -> AnalysisService -> ClaudeService -> Anthropic
 
 Exercise 6
 customer message -> FastAPI -> ResponseService -> ClaudeService -> draft support message
+
+
+==========================================================================================================
+======================================== DAY 2 OVERVIEW ==================================================
+==========================================================================================================
+Day 1 Recap
+HTTP request -> FastAPI -> Pydantic validation -> Application Service -> ClaudeService -> Claude -> validated/text result -> HTTP response
+
+Day 2 extend the same application
+
+FastAPI
+   |
+   +--------------------+
+   |                    |
+   v                    v
+ClaudeService        repositories (interact with yout db)
+   |                    |
+   v                    v
+Claude              MongoDB
+   |                    |
+   +----------+---------+
+              |
+              v
+       application workflow
+              |
+              v
+       controlled tools
+
+Traditional Workflow: developer choose the sequence 
+
+Agentic Workflow: Claude may choose among different capabilities that the developer permits
+
+
+======================================== MongoDB OVERVIEW ==================================================
+database   -> your_db
+collection -> orders
+document   -> one order
+query      -> which record(s)?
+projection -> which fields?
+index      -> supports common query patterns
