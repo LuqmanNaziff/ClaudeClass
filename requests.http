@@ -65,3 +65,35 @@ Content-Type: application/json
 {
   "customer_message": "My order was due yesterday and I am frustrated because it still has not arrived."
 }
+
+
+### Test /generate-response endpoint (use ORD-1005 because it is scoped to CUST-104.)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order? It is late.",
+  "customer_id": "CUST-104",
+  "order_id": "ORD-1005"
+}
+
+
+### Test /generate-response endpoint (Wrong-customer request — this must not expose the order as trusted context.)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order?",
+  "customer_id": "CUST-101",
+  "order_id": "ORD-1005"
+}
+
+
+### Test /generate-response endpoint (Order without customer — request validation should reject this before database or Claude work)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order?",
+  "order_id": "ORD-1005"
+}
