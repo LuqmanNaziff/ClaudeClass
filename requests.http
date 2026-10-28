@@ -115,3 +115,30 @@ GET http://127.0.0.1:8000/tickets/TKT-8edb72f8
 
 ### Test /tickets endpoint (list customer tickets)
 GET http://127.0.0.1:8000/tickets?customer_id=CUST-104
+
+
+### Test /faq/ask endpoint (Strong match)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "What happens if my delivery is late?"
+}
+
+
+### Test /faq/ask endpoint (broader question)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "Can I get my money back if an order is delayed?"
+}
+
+
+### Test /faq/ask endpoint (no match)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "How do I make my own mayonnaise at home?"
+}
