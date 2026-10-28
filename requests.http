@@ -142,3 +142,12 @@ Content-Type: application/json
 {
   "question": "How do I make my own mayonnaise at home?"
 }
+
+### Test /generate-response endpoint with FAQ ID
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "What is the approved return period?",
+  "faq_ids": ["FAQ-001"]
+}

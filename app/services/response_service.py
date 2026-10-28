@@ -5,6 +5,8 @@ from app.services.claude_service import (
     ClaudeService,
     ClaudeTextResult,
 )
+from app.schemas.faq import FAQSource
+
 
 class ResponseService:
     def __init__(self, claude_service: ClaudeService) -> None:
@@ -15,8 +17,12 @@ class ResponseService:
         customer_message: str,
         *,
         order_context: OrderContext | None = None,
+        faq_context: list[FAQSource] | None = None,
     ) -> ClaudeTextResult:
-        # Keep user input and trusted context as distinct fields.
+        # The caller may omit FAQ context for other existing use cases.
+        faq_context = faq_context or []
+
+        # Trusted data comes from repositories, not user claims.
         payload = {
             "customer_message": customer_message,
             "trusted_order_context": (
@@ -24,20 +30,21 @@ class ResponseService:
                 if order_context
                 else None
             ),
+            "trusted_faq_context": [
+                faq.model_dump(mode="json")
+                for faq in faq_context
+            ],
         }
 
-        # Serialize the application-created structure before sending it to Claude.
         user_prompt = (
             "Customer request and application "
             "context:\n"
-            + serialize_prompt_payload(
-                payload
-            )
+            + serialize_prompt_payload(payload)
         )
 
-        # Claude drafts text; the application decides what context it receives.
         return await self.claude_service.generate_text(
             user_prompt,
-            system = RESPONSE_GENERATION_SYSTEM_PROMPT,
-            max_tokens = 350,
+            system=RESPONSE_GENERATION_SYSTEM_PROMPT,
+            max_tokens=350,
         )
+

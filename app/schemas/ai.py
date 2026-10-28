@@ -104,6 +104,13 @@ class GenerateResponseRequest(StrictModel):
         max_length=50,
     )
 
+    # Caller supplies identifiers; the repository still verifies approval.
+    faq_ids: list[str] = Field(
+        default_factory=list,
+        max_length=3,
+    )
+
+
     @model_validator(mode="after")
     def validate_order_context(self) -> "GenerateResponseRequest":
         # If an order_id is provided, the request must also include a customer_id.
@@ -112,8 +119,12 @@ class GenerateResponseRequest(StrictModel):
         return self
 
 class ResponseContextUsed(StrictModel):
-    # Make trusted context visible in the API response for learning/debugging
-    order_id : str | None = None
+    # Report the trusted context actually retrieved, not IDs merely requested.
+    order_id: str | None = None
+    faq_ids: list[str] = Field(
+        default_factory=list,
+    )
+
 
 # Reply of POST /generate-response: the draft text for a human to review,
 # plus token usage. min_length=1 rejects an empty draft.

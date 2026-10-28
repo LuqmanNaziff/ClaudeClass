@@ -17,6 +17,8 @@ from app.database import get_database
 from app.repositories.order_repository import OrderRepository
 from app.schemas.ai import ResponseContextUsed
 from app.services.generate_response_service import GenerateResponseService
+from app.repositories.faq_repository import FAQRepository
+
 
 # Routes only accept the request and shape the response. FastAPI/Pydantic
 # validate the incoming body; the Claude work happens in the services.
@@ -106,6 +108,7 @@ async def generate_response(
     service = GenerateResponseService(
         response_service = ResponseService(claude_service),
         order_repository = OrderRepository(database),
+        faq_repository = FAQRepository(database),
     )
 
     try:
@@ -120,6 +123,7 @@ async def generate_response(
         draft_response = result.draft_response,
         context_used = ResponseContextUsed(
             order_id = result.order_id_used,
+            faq_ids = result.faq_ids_used,
         ),
         usage=AIUsage(
             model = result.model,
