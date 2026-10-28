@@ -50,7 +50,7 @@ Valid JSON? Yes
 Valid TicketAnalysis output? No
 
 Currently, the /analysis endpoints works as so:
-HTTP -> route -> AnalysisService -> ClaudeService -> Anthropic 
+HTTP -> route -> AnalysisService -> ClaudeService -> Anthropic
 
 
 Exercise 6
@@ -83,7 +83,7 @@ Claude              MongoDB
               v
        controlled tools
 
-Traditional Workflow: developer choose the sequence 
+Traditional Workflow: developer choose the sequence
 
 Agentic Workflow: Claude may choose among different capabilities that the developer permits
 
@@ -97,7 +97,7 @@ projection -> which fields?
 index      -> supports common query patterns
 
 To be implemented for day 2
-Retrieval and generation are separate responsibilities 
+Retrieval and generation are separate responsibilities
 
 customer message
      +
@@ -113,3 +113,15 @@ customer message
      |
      v
 Claude
+
+
+
+======================================== Store analysis as application state ==================================================
+
+POST /tickets -> validate -> analyse -> app determine status -> app create ticket ID -> MongoDB insert
+
+/tickets endpoint workflow:
+user supplies customer/order/message;
+Claude supplies validated analysis;
+Python creates ticket ID/timestamps/status;
+repository writes to MongoDB.

@@ -97,3 +97,21 @@ Content-Type: application/json
   "customer_message": "Where is my order?",
   "order_id": "ORD-1005"
 }
+
+
+### Test /tickets endpoint (This request should analyse the message, create application metadata, and persist the result)
+POST http://127.0.0.1:8000/tickets
+Content-Type: application/json
+
+{
+  "customer_id": "CUST-104",
+  "order_id": "ORD-1005",
+  "message": "My order is late again. Where is it?"
+}
+
+
+### Test /tickets endpoint (retrieve above ticket)
+GET http://127.0.0.1:8000/tickets/TKT-8edb72f8
+
+### Test /tickets endpoint (list customer tickets)
+GET http://127.0.0.1:8000/tickets?customer_id=CUST-104
