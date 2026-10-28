@@ -139,7 +139,16 @@ A customer sends 1 support request. Which of the above need to run and in what o
 
 analyse -> decide required context -> order/faq lookup? -> create ticket -> generate response -> update ticket
 
-This is a Traditional / deterministic workflow 
+This is a Traditional / deterministic workflow
 because the dev defines the seqence and rules
 
-Claude performs AI tasks inside this workflow BUT does not choose the orchestration 
+Claude performs AI tasks inside this workflow BUT does not choose the orchestration
+
+For Exercise 4, ask yourselves:
+What must happen before you know whether a lookup is required?
+If analysis requires order information but there is no usable order context, what application state should result?
+If FAQ retrieval is required but no approved source exists, should the model invent the policy?
+Who creates/persists the ticket?
+Who determines final ticket status?
+Which step(s) involve Claude?
+Which steps are ordinary Python/database logic?
