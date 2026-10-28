@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     mongodb_uri: SecretStr
 
     # Name of the database inside the MongoDB server.
-    mongodb_database: str = "cluster0"
+    mongodb_database: str = "supportops"
 
 # lru_cache makes this build Settings only once; every later call returns
 # the same object, so .env is read a single time.
