@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic.v1 import Field
+from pydantic import Field
 
 from app.schemas.common import StrictModel
 from app.schemas.ticket import TicketResponse
@@ -16,12 +16,14 @@ class WorkflowStep(str, Enum):
     DATABASE_UPDATE = "database_update"
 
 class ProcessTicketRequest(StrictModel):
+    # min_length=3 matches TicketCreateRequest, so a short ID fails here
+    # with a 422 instead of crashing later when the ticket is created.
     customer_id: str =Field(
-        min_length=1, 
+        min_length=3,
         max_length=50,
     )
 
-    order_id: str = Field(
+    order_id: str | None = Field(
         default=None,
         min_length=1, 
         max_length=50,
