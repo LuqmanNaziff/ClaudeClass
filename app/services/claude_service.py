@@ -3,7 +3,7 @@ from typing import Generic, TypeVar
 from anthropic import AsyncAnthropic
 from pydantic import BaseModel, ValidationError
 from app.config import get_settings
-
+from typing import Any
 # route/service -> ClaudeService -> Anthropic SDK (anthropic.AsyncAnthropic)
 # Routes never talk to the Anthropic SDK directly. They call this service,
 # which keeps all Claude API access behind one clear boundary.
@@ -15,7 +15,7 @@ class ClaudeConfigurationError(RuntimeError):
     # so callers can tell a setup problem apart from an API failure.
     pass
 
-class ClaudeErrorResponse(RuntimeError):
+class ClaudeResponseError(RuntimeError):
     # Raised when the Claude API returns an error response, so callers can
     # tell an API failure apart from a setup problem.
     pass
@@ -178,14 +178,14 @@ class ClaudeService:
         except ValidationError as exc:
             # The reply did not match the schema: never treat it as valid
             # application data. Re-raise as our own error type.
-            raise ClaudeErrorResponse(
+            raise ClaudeResponseError(
                 "Claude structured output failed application validation"
             ) from exc
 
         # parsed_output is None when nothing could be parsed (for example,
         # the response was cut off or refused), so check before using it.
         if message.parsed_output is None:
-            raise ClaudeErrorResponse(
+            raise ClaudeResponseError(
                 "Claude returned no structured output"
             )
 
@@ -196,6 +196,37 @@ class ClaudeService:
             input_tokens=message.usage.input_tokens,
             output_tokens=message.usage.output_tokens,
         )
+
+    async def create_message(
+        self,
+        messages: list[dict[str, Any]],
+        *,
+        max_tokens: int = 600,
+        system: str | None = None,
+        tools: list[
+            dict[str, Any]
+        ] | None = None,
+    ) -> Any:
+        """Send a raw Messages API request so tool_use blocks remain available."""
+        request: dict[str, Any] = {
+            "model": self.model,
+            "max_tokens": max_tokens,
+            "messages": messages,
+        }
+
+        # Add optional request fields only when the caller supplies them.
+        if system:
+            request["system"] = system
+
+        if tools:
+            request["tools"] = tools
+
+        # Unlike generate_text/structured, return the raw SDK message.
+        return (
+            await self.client
+            .messages.create(**request)
+        )
+
 
     async def close(self) -> None:
         # Releases the HTTP connections held by the client. Meant to be

@@ -152,3 +152,55 @@ Who creates/persists the ticket?
 Who determines final ticket status?
 Which step(s) involve Claude?
 Which steps are ordinary Python/database logic?
+
+
+======================================== Traditional vs Agentic Workflows ==================================================
+TRADITIONAL / DETERMINISTIC
+
+developer code:
+analyse
+ -> lookup
+ -> save
+ -> generate
+ -> update
+
+Claude:
+performs defined AI tasks
+
+
+AGENTIC
+
+application:
+defines permitted tools
+
+Claude:
+may request which permitted
+capability to use next
+
+application:
+validates and executes
+
+
+“Does agentic mean Claude gets direct database access?” NO
+
+
+
+======================================== Controlled Tools & Introductory Agent ========================================
+Claude response:
+tool_use(
+    name="get_order_status",
+    input={"order_id": "ORD-1005"}
+)
+
+        |
+        v
+
+Application:
+1. Is this tool allowlisted?
+2. Are arguments valid?
+3. Is this order allowed for this request?
+4. Execute application code.
+5. Return tool_result to Claude.
+
+
+Claude does not execute Python functions by magic. Claude returns a structured request. The application decides whether and how to execute it.

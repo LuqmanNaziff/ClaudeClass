@@ -4,6 +4,7 @@ from app.api.routes.health import router as health_router
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.faq import router as faq_router
 from app.api.routes.workflows import router as workflows_router
+from app.api.routes.agent import router as agent_router
 
 # main.py -> api_router -> one router per feature (app/api/routes/*.py)
 # This file is the single place where every route module is plugged into the
@@ -22,3 +23,5 @@ api_router.include_router(faq_router)
 # /workflows/process-ticket -> Python decides every step (deterministic).
 # /agent/support            -> Claude chooses which tools to call (agentic).
 api_router.include_router(workflows_router)
+# Attach /agent endpoints to the API.
+api_router.include_router(agent_router)
