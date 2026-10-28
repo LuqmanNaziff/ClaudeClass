@@ -92,6 +92,29 @@ class GenerateResponseRequest(StrictModel):
         max_length=5000,
     )
 
+    customer_id: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=50,
+    )
+
+    order_id: str | None = Field(
+        default=None,
+        min_length=3,
+        max_length=50,
+    )
+
+    @model_validator(mode="after")
+    def validate_order_context(self) -> "GenerateResponseRequest":
+        # If an order_id is provided, the request must also include a customer_id.
+        if self.order_id and not self.customer_id:
+            raise ValueError("customer_id is required when order_id is provided")
+        return self
+
+class ResponseContextUsed(StrictModel):
+    # Make trusted context visible in the API response for learning/debugging
+    order_id : str | None = None
+
 # Reply of POST /generate-response: the draft text for a human to review,
 # plus token usage. min_length=1 rejects an empty draft.
 class GenerateResponseResponse(StrictModel):
@@ -99,4 +122,5 @@ class GenerateResponseResponse(StrictModel):
         min_length=1,
         max_length=5000,
     )
+    context_used: ResponseContextUsed
     usage: AIUsage

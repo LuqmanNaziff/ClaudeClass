@@ -95,3 +95,21 @@ document   -> one order
 query      -> which record(s)?
 projection -> which fields?
 index      -> supports common query patterns
+
+To be implemented for day 2
+Retrieval and generation are separate responsibilities 
+
+customer message
+     +
+customer_id / order_id
+     |
+     v
+OrderRepository
+     |
+     v
+trusted OrderContext
+     +
+customer message
+     |
+     v
+Claude
