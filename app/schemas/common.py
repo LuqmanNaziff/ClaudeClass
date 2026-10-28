@@ -36,3 +36,12 @@ class Priority(str, Enum):
 
 class HealthResponse(StrictModel):
     status: Literal["ok"]
+
+class TicketStatus(str, Enum):
+    NEW = "new"
+    ANALYSED = "analysed"
+    PROCESSED = "processed"
+    NEEDS_HUMAN_REVIEW = "needs_human_review"
+    ESCALATED = "escalated"
+    PROCESSING_FAILED = "processing_failed"
+    CLOSED = "closed"

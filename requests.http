@@ -65,3 +65,89 @@ Content-Type: application/json
 {
   "customer_message": "My order was due yesterday and I am frustrated because it still has not arrived."
 }
+
+
+### Test /generate-response endpoint (use ORD-1005 because it is scoped to CUST-104.)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order? It is late.",
+  "customer_id": "CUST-104",
+  "order_id": "ORD-1005"
+}
+
+
+### Test /generate-response endpoint (Wrong-customer request — this must not expose the order as trusted context.)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order?",
+  "customer_id": "CUST-101",
+  "order_id": "ORD-1005"
+}
+
+
+### Test /generate-response endpoint (Order without customer — request validation should reject this before database or Claude work)
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "Where is my order?",
+  "order_id": "ORD-1005"
+}
+
+
+### Test /tickets endpoint (This request should analyse the message, create application metadata, and persist the result)
+POST http://127.0.0.1:8000/tickets
+Content-Type: application/json
+
+{
+  "customer_id": "CUST-104",
+  "order_id": "ORD-1005",
+  "message": "My order is late again. Where is it?"
+}
+
+
+### Test /tickets endpoint (retrieve above ticket)
+GET http://127.0.0.1:8000/tickets/TKT-8edb72f8
+
+### Test /tickets endpoint (list customer tickets)
+GET http://127.0.0.1:8000/tickets?customer_id=CUST-104
+
+
+### Test /faq/ask endpoint (Strong match)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "What happens if my delivery is late?"
+}
+
+
+### Test /faq/ask endpoint (broader question)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "Can I get my money back if an order is delayed?"
+}
+
+
+### Test /faq/ask endpoint (no match)
+POST http://127.0.0.1:8000/faq/ask
+Content-Type: application/json
+
+{
+  "question": "How do I make my own mayonnaise at home?"
+}
+
+### Test /generate-response endpoint with FAQ ID
+POST http://127.0.0.1:8000/generate-response
+Content-Type: application/json
+
+{
+  "customer_message": "What is the approved return period?",
+  "faq_ids": ["FAQ-001"]
+}

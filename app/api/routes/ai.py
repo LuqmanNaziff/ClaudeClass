@@ -13,6 +13,11 @@ from app.schemas.ai import (
 from app.services.response_service import ResponseService
 from app.schemas.usage import AIUsage
 from app.services.analysis_service import AnalysisService
+from app.database import get_database
+from app.repositories.order_repository import OrderRepository
+from app.schemas.ai import ResponseContextUsed
+from app.services.generate_response_service import GenerateResponseService
+from app.repositories.faq_repository import FAQRepository
 
 
 # Routes only accept the request and shape the response. FastAPI/Pydantic
@@ -23,7 +28,7 @@ router = APIRouter(tags=["ai"])
 # POST /summarise: send some text, get a short summary back.
 @router.post(
     "/summarise",
-    response_model=SummariseResponse
+    response_model = SummariseResponse
 )
 async def summarise_text(
     request: SummariseRequest,
@@ -36,8 +41,8 @@ async def summarise_text(
         # the separate system prompt. max_tokens keeps summaries short/cheap.
         result = await claude_service.generate_text(
             request.text,
-            system=SUMMARISE_SYSTEM_PROMPT,
-            max_tokens=150,
+            system = SUMMARISE_SYSTEM_PROMPT,
+            max_tokens = 150,
         )
     finally:
         # Always release the HTTP connections, even if the call failed.
@@ -45,17 +50,17 @@ async def summarise_text(
 
     # Map the service result onto the public response model.
     return SummariseResponse(
-        summary=result.text,
-        model=result.model,
-        input_tokens=result.input_tokens,
-        output_tokens=result.output_tokens,
+        summary = result.text,
+        model = result.model,
+        input_tokens = result.input_tokens,
+        output_tokens = result.output_tokens,
     )
 
 # POST /analyse: send a support message, get a structured TicketAnalysis
 # plus token usage back.
 @router.post(
     "/analyse",
-    response_model=AnalyseResponse,
+    response_model = AnalyseResponse,
 )
 async def analyse_ticket(
     request: AnalyseRequest,
@@ -78,11 +83,11 @@ async def analyse_ticket(
     # result.data is the validated TicketAnalysis; usage is grouped in
     # its own AIUsage object so token counts stay separate from the answer.
     return AnalyseResponse(
-        analysis=result.data,
+        analysis = result.data,
         usage=AIUsage(
-            model=result.model,
-            input_tokens=result.input_tokens,
-            output_tokens=result.output_tokens,
+            model = result.model,
+            input_tokens = result.input_tokens,
+            output_tokens = result.output_tokens,
         ),
     )
 
@@ -96,28 +101,33 @@ async def analyse_ticket(
 async def generate_response(
     request: GenerateResponseRequest,
 ) -> GenerateResponseResponse:
-    # Same pattern as /analyse: the route builds the services and
-    # ResponseService holds the use-case logic.
+    # Routes obtain application dependencies; they do not query Mongo directly.
+    database = get_database()
     claude_service = ClaudeService()
-    response_service = ResponseService(
-        claude_service
+
+    service = GenerateResponseService(
+        response_service = ResponseService(claude_service),
+        order_repository = OrderRepository(database),
+        faq_repository = FAQRepository(database),
     )
 
     try:
-        result = await response_service.generate(
-            request.customer_message
-        )
+        # Application service coordinates trusted retrieval and generation.
+        result = await service.generate(request)
     finally:
-        # Always release the HTTP connections, even if the call failed.
+        # Close the per-request Claude client even if generation fails.
         await claude_service.close()
 
-    # The draft is plain text (result.text), so there is no schema to
-    # unpack here; usage is grouped in AIUsage as in /analyse.
+    # Return both the draft and which trusted order context was actually used.
     return GenerateResponseResponse(
-        draft_response=result.text,
+        draft_response = result.draft_response,
+        context_used = ResponseContextUsed(
+            order_id = result.order_id_used,
+            faq_ids = result.faq_ids_used,
+        ),
         usage=AIUsage(
-            model=result.model,
-            input_tokens=result.input_tokens,
-            output_tokens=result.output_tokens,
+            model = result.model,
+            input_tokens = result.input_tokens,
+            output_tokens = result.output_tokens,
         ),
     )
