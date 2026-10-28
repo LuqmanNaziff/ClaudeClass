@@ -24,5 +24,5 @@ class WorkflowService:
         self.faq_repository = faq_repository
 
     async def process(self, request: ProcessTicketRequest,):
-        # Exercise 04: participants define deterministic ordering/branches.
+        # Exercise 04: you define deterministic ordering/branches.
         raise NotImplementedError
