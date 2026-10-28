@@ -125,3 +125,21 @@ user supplies customer/order/message;
 Claude supplies validated analysis;
 Python creates ticket ID/timestamps/status;
 repository writes to MongoDB.
+
+
+Day 2 16:00
+
+/analyse
+order lookup
+FAQ search
+ticket create/save
+response generation
+
+A customer sends 1 support request. Which of the above need to run and in what order?
+
+analyse -> decide required context -> order/faq lookup? -> create ticket -> generate response -> update ticket
+
+This is a Traditional / deterministic workflow 
+because the dev defines the seqence and rules
+
+Claude performs AI tasks inside this workflow BUT does not choose the orchestration 
