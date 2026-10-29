@@ -1,0 +1,7 @@
+[
+  { "category": "food", "monthly_limit": 500 },
+  { "category": "transport", "monthly_limit": 200 },
+  { "category": "shopping", "monthly_limit": 300 },
+  { "category": "bills", "monthly_limit": 400 },
+  { "category": "entertainment", "monthly_limit": 100 }
+]

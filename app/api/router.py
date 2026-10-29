@@ -4,6 +4,7 @@ from app.api.routes.agent import router as agent_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.faq import router as faq_router
 from app.api.routes.health import router as health_router
+from app.api.routes.spending import router as spending_router
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.usage import router as usage_router
 from app.api.routes.workflows import router as workflows_router
@@ -27,3 +28,5 @@ api_router.include_router(workflows_router)
 api_router.include_router(agent_router)
 # AI usage logs and their summary.
 api_router.include_router(usage_router)
+# End-of-day project: Personal Spending Tracker.
+api_router.include_router(spending_router)

@@ -166,6 +166,7 @@ async def http_exception_handler(
         404: "NOT_FOUND",
         405: "METHOD_NOT_ALLOWED",
         409: "CONFLICT",
+        422: "UNPROCESSABLE",
     }
 
     message = (

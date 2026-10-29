@@ -107,6 +107,14 @@ async def seed(reset: bool) -> None:
                 upsert=True,
             )
 
+        # Spending tracker: one budget limit per category.
+        for budget in load_json("budgets.json"):
+            await database.budgets.replace_one(
+                {"category": budget["category"]},
+                budget,
+                upsert=True,
+            )
+
         await ensure_indexes(database)
 
         order_count = await database.orders.count_documents({})
@@ -115,6 +123,7 @@ async def seed(reset: bool) -> None:
         print(f"Database: {database.name}")
         print(f"Orders available: {order_count}")
         print(f"FAQs available: {faq_count}")
+        print(f"Budgets available: {await database.budgets.count_documents({})}")
         print("Indexes: ready")
         print(
             "Mode: reset and seed"

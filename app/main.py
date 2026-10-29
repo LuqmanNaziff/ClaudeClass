@@ -17,6 +17,7 @@ from app.database import (
     connect_to_database,
     get_database,
 )
+from app.repositories.spending_repository import SpendingRepository
 from app.repositories.ticket_repository import TicketRepository
 from app.repositories.usage_repository import UsageRepository
 
@@ -39,6 +40,7 @@ async def lifespan(app: FastAPI):
     # Create the MongoDB indexes (safe to run on every startup).
     await UsageRepository(database).ensure_indexes()
     await TicketRepository(database).ensure_indexes()
+    await SpendingRepository(database).ensure_indexes()
 
     # One structured log line to show that startup finished.
     log_event(

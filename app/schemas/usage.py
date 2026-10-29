@@ -13,6 +13,8 @@ class AIOperation(str, Enum):
     RESPONSE_GENERATION = "response_generation"
     FAQ_ANSWER = "faq_answer"
     AGENT_DECISION = "agent_decision"
+    EXPENSE_PARSE = "expense_parse"
+    BUDGET_ADVICE = "budget_advice"
 
 
 # What a Claude call reports about itself: the model and its token counts.
