@@ -157,7 +157,7 @@ Which steps are ordinary Python/database logic?
 ======================================== Traditional vs Agentic Workflows ==================================================
 TRADITIONAL / DETERMINISTIC
 
-developer code:
+developer code: dev defines sequence
 analyse
  -> lookup
  -> save
@@ -169,6 +169,8 @@ performs defined AI tasks
 
 
 AGENTIC
+dev:
+define allowed capabilities
 
 application:
 defines permitted tools
@@ -202,5 +204,30 @@ Application:
 4. Execute application code.
 5. Return tool_result to Claude.
 
+search_faq
+escalate_ticket
+
+refund_customer
 
 Claude does not execute Python functions by magic. Claude returns a structured request. The application decides whether and how to execute it.
+
+
+1. Extend ClaudeService for tool use
+2. Define tool contracts 
+
+
+======================================== Security, Prompt Injection, Least Privilege ========================================
+
+
+Customer HTTP message             UNTRUSTED
+Claude text + proposed tool args   UNTRUSTED
+                 |
+              FastAPI
+                 |
+       Pydantic input validation
+                 |
+       AgentService + ToolRegistry
+                 |
+     allowed tools + customer/order scope
+                 |
+          application action
