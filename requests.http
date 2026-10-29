@@ -212,8 +212,7 @@ Content-Type: application/json
 
 {
   "customer_id": "CUST-104",
-  "order_id": "ORD-1005",
-  "message": "Where is my order? It should have arrived already."
+  "message": "Hi"
 }
 
 

@@ -231,3 +231,35 @@ Claude text + proposed tool args   UNTRUSTED
      allowed tools + customer/order scope
                  |
           application action
+
+
+Classify sentiment
+Claude may suggest; Pydantic validates
+
+Request search_faq
+Claude may choose; Python executes allowed retrieval
+
+View someone else’s order
+Application must deny unauthorized context
+
+Issue an arbitrary refund
+Not in the allowed tool surface
+
+Delete all tickets
+Not an allowed agent tool
+
+Escalate the current ticket
+Claude may request; Python validates and saves
+
+Change MongoDB user permissions
+Not available to the agent
+
+
+
+========================================  What do we need to observe? ==================================================
+HTTP request (request_id)
+     -> route + use case (operation, elapsed time)
+     -> Claude API (model, I/O tokens)
+     -> UsageService (estimated cost)
+     -> UsageRepository (ai_usage_logs)
+     -> GET /usage (filter/summary)
