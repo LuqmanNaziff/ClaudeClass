@@ -2,9 +2,10 @@ from fastapi import FastAPI
 from app.api.router import api_router
 from app.config import get_settings
 from contextlib import asynccontextmanager
-from app.database import connect_to_database, close_database
+from app.database import get_database, connect_to_database, close_database
 from app.core.errors import register_exception_handlers, request_id_middleware
 from app.core.logging import configure_logging, log_event
+from app.repositories.usage_repository import UsageRepository
 
 # Load settings once when the module is imported (fails early if a
 # required setting such as APP_NAME is missing).
@@ -18,6 +19,9 @@ async def lifespan(app: FastAPI):
     # Open the shared MongoDB connection once, not on every request.
     await connect_to_database()
     try:
+        # Create the UsageRepository instance.
+        await UsageRepository(get_database()).ensure_indexes()
+
         yield  # The application serves requests while paused here.
     finally:
         # Close the connection on shutdown, even if the app stopped with an error.

@@ -30,6 +30,17 @@ class Settings(BaseSettings):
         le=5,
     )
 
+    claude_input_cost_per_million_usd: float = Field(
+        default=0.0004,
+        ge=0.0,
+    )
+    claude_output_cost_per_million_usd: float = Field(
+        default=0.0004,
+        ge=0.0,
+    )
+
+    log_level: str = "INFO"
+
     # Where to load settings from: a .env file in the working directory.
     # extra="ignore" skips unknown variables instead of raising an error.
     model_config = SettingsConfigDict(

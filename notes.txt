@@ -258,8 +258,9 @@ Not available to the agent
 
 ========================================  What do we need to observe? ==================================================
 HTTP request (request_id)
-     -> route + use case (operation, elapsed time)
+     -> route + use case (operation, elapsed time) latency_ms
      -> Claude API (model, I/O tokens)
-     -> UsageService (estimated cost)
+     -> UsageService (estimated cost) estimated_cost_usd
      -> UsageRepository (ai_usage_logs)
      -> GET /usage (filter/summary)
+

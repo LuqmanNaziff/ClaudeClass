@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from time import perf_counter
+
+from fastapi import APIRouter, Request
 from app.prompts.summarise import (SUMMARISE_SYSTEM_PROMPT,)
 
+from app.repositories.usage_repository import UsageRepository
 from app.services.claude_service import ClaudeService
 from app.schemas.ai import (
     AnalyseRequest,
@@ -11,13 +14,14 @@ from app.schemas.ai import (
     SummariseResponse,
 )
 from app.services.response_service import ResponseService
-from app.schemas.usage import AIUsage
+from app.schemas.usage import AIOperation, AIUsage
 from app.services.analysis_service import AnalysisService
 from app.database import get_database
 from app.repositories.order_repository import OrderRepository
 from app.schemas.ai import ResponseContextUsed
 from app.services.generate_response_service import GenerateResponseService
 from app.repositories.faq_repository import FAQRepository
+from app.services.usage_service import UsageService
 
 
 # Routes only accept the request and shape the response. FastAPI/Pydantic
@@ -64,6 +68,7 @@ async def summarise_text(
 )
 async def analyse_ticket(
     request: AnalyseRequest,
+    http_request: Request,
 ) -> AnalyseResponse:
     # The route builds the services; AnalysisService holds the use-case
     # logic and uses ClaudeService for the API call.
@@ -73,6 +78,7 @@ async def analyse_ticket(
     )
 
     try:
+        started = perf_counter()
         result = await analysis_service.analyse(
             request.message
         )
@@ -82,13 +88,23 @@ async def analyse_ticket(
 
     # result.data is the validated TicketAnalysis; usage is grouped in
     # its own AIUsage object so token counts stay separate from the answer.
+    latency_ms = int((perf_counter() - started) * 1000)
+    usage = AIUsage(
+        model = result.model,
+        input_tokens = result.input_tokens,
+        output_tokens = result.output_tokens,
+        latency_ms = latency_ms,
+    )
+    await UsageService(
+        UsageRepository(get_database())
+    ).safe_record(
+        request_id = http_request.state.request_id,
+        operation = AIOperation.TICKET_ANALYSIS,
+        usage = usage,
+    )
     return AnalyseResponse(
         analysis = result.data,
-        usage=AIUsage(
-            model = result.model,
-            input_tokens = result.input_tokens,
-            output_tokens = result.output_tokens,
-        ),
+        usage=usage,
     )
 
 
@@ -100,6 +116,7 @@ async def analyse_ticket(
 )
 async def generate_response(
     request: GenerateResponseRequest,
+    http_request: Request,
 ) -> GenerateResponseResponse:
     # Routes obtain application dependencies; they do not query Mongo directly.
     database = get_database()
@@ -111,6 +128,7 @@ async def generate_response(
         faq_repository = FAQRepository(database),
     )
 
+    started = perf_counter()
     try:
         # Application service coordinates trusted retrieval and generation.
         result = await service.generate(request)
@@ -118,6 +136,20 @@ async def generate_response(
         # Close the per-request Claude client even if generation fails.
         await claude_service.close()
 
+    latency_ms = int((perf_counter() - started) * 1000)
+    usage = AIUsage(
+        model = result.model,
+        input_tokens = result.input_tokens,
+        output_tokens = result.output_tokens,
+        latency_ms = latency_ms,
+    )
+    await UsageService(
+        UsageRepository(database)
+    ).safe_record(
+        request_id = http_request.state.request_id,
+        operation = AIOperation.RESPONSE_GENERATION,
+        usage = usage,
+    )
     # Return both the draft and which trusted order context was actually used.
     return GenerateResponseResponse(
         draft_response = result.draft_response,
@@ -125,9 +157,5 @@ async def generate_response(
             order_id = result.order_id_used,
             faq_ids = result.faq_ids_used,
         ),
-        usage=AIUsage(
-            model = result.model,
-            input_tokens = result.input_tokens,
-            output_tokens = result.output_tokens,
-        ),
+        usage=usage,
     )
